@@ -1,3 +1,9 @@
+const KEYS = {
+    PAGE_SCHEMA_LIST: 'page_schema_list', // 业务应用从schema获取到的页面配置相关信息
+    APP_BRANCH_NAME: 'app_branch_name',// 业务应用分支
+    SCHEMA_EDIT_BRANCH_NAME: 'schema_edit_branch_name',// 动态搭建选择的分支，用于生成跳转到指定页面路由
+}
+
 const guid = () => {
     let d = Date.now();
 
@@ -11,3 +17,29 @@ const guid = () => {
         return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
 };
+
+const setLocalStorage = (k,d) => {
+    try {
+        localStorage.setItem(k, d);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+const getLocalStorage = (k) => {
+    const res = localStorage.getItem(k);
+    try {
+        return JSON.parse(res);
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+
+
+async function getAllCookies(storeId) {
+    const cookies = await chrome.cookies.getAll({ storeId });
+    console.log("cookies", cookies);
+    return cookies;
+}

@@ -1,18 +1,14 @@
 {
-    "manifest_version": 3,
-    "name": "yqn",
-    "version": "2.0",
-    "action": {
-      "default_popup": "popup.html",
-      "default_icon": "logo.png"
-    },
-    "host_permissions": [
-      "*://*.google.com.hk/",
-      "*://*.yqn.com/"
-    ],
-    "permissions": ["tabs","storage","cookies"],
-    "background": {
-      "service_worker": "background.js"
-    }
+  "manifest_version": 3,
+  "name": "yqn-chrome-extension",
+  "version": "2.0",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "logo.png"
+  },
+  "host_permissions": ["*://*.yqn.com/*", "*://*.iyunquna.com/*"],
+  "permissions": ["tabs", "storage", "cookies", "webRequest", "webRequestBlocking","webRequestAuthProvider"],
+  "background": {
+    "service_worker": "background.js"
   }
-  
+}
