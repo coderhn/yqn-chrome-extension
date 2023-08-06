@@ -1,14 +1,34 @@
 {
   "manifest_version": 3,
   "name": "yqn-chrome-extension",
+  "description": "一个服务于yqn动态搭建的chrome extension",
   "version": "2.0",
   "action": {
     "default_popup": "popup.html",
     "default_icon": "logo.png"
   },
-  "host_permissions": ["*://*.yqn.com/*", "*://*.iyunquna.com/*"],
-  "permissions": ["tabs", "storage", "cookies", "webRequest", "webRequestBlocking","webRequestAuthProvider"],
+  "host_permissions": ["*://*.yqn.com/*", "*://*.iyunquna.com/*", "*://map.weixin.qq.com/*"],
+  "permissions": [
+    "tabs",
+    "storage",
+    "cookies",
+    "webRequest",
+    "webRequestBlocking",
+    "webRequestAuthProvider",
+    "declarativeNetRequest",
+    "https://*/*"
+  ],
   "background": {
-    "service_worker": "background.js"
-  }
+    "service_worker":"background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "matches": ["<all_urls>"],
+      "resources":["assets/"]
+    }
+  ],
+  "content_scripts":[{
+    "matches":["<all_urls>"],
+    "js":["content.js"]
+  }]
 }

@@ -7,14 +7,14 @@ chrome.tabs.query({ active: true, currentWindow: true }, async function (tabs) {
     var url = new URL(tabs[0].url);
 
 
-    const pageShcemaList = getLocalStorage(KEYS.PAGE_SCHEMA_LIST);
+    // const pageShcemaList = getLocalStorage(KEYS.PAGE_SCHEMA_LIST);
 
-    if (pageShcemaList && getLocalStorage(KEYS.APP_BRANCH_NAME) === appFeatureBranch) {
-        createAElement(pageShcemaList.find((d) => d.path === url.pathname), url.port, schemaFeatureBranch);
-        return;
-    }
+    // if (pageShcemaList && getLocalStorage(KEYS.APP_BRANCH_NAME) === appFeatureBranch) {
+    //     createAElement(pageShcemaList.find((d) => d.path === url.pathname), url.port, schemaFeatureBranch);
+    //     return;
+    // }
 
-    await initView(url);
+    // await initView(url);
 
 });
 
@@ -91,15 +91,15 @@ async function initView(url) {
                 text.innerHTML = `初始化失败:在schema列表中没有找到当前页面的配置`
             }, 1000);
         }
-
-        // const aElement = document.createElement('a');
-        // aElement.setAttribute('href', `https://ops.iyunquna.com/63005/configuration?pageId=${curPageSchemaConfig.pageId}&appId=${url.port}&layout_level=1&source=页面配置&email_key=${schemaFeatureBranch}`);
-        // aElement.setAttribute('target', '_blank');
-        // aElement.innerText = `前往${curPageSchemaConfig.pageTitle || curPageSchemaConfig.desc}schema编辑页`;
-        // conatiner.appendChild(aElement);
     } else {
         setTimeout(() => {
             text.innerHTML = `初始化失败:${schemaRes.msg}`
         }, 1000);
     }
 }
+
+
+
+
+
+// https://ops.iyunquna.com/63005/configuration?pageId=61f0e13a-ec55-4816-90eb-c973c45f089c&env=undefined&appId=62100&layout_level=1&source=%E9%A1%B5%E9%9D%A2%E9%85%8D%E7%BD%AE&email_key=feature%2F051867dc_1_both

@@ -1,14 +1,19 @@
-// content.js
+// content_script.js
 
-// 假设要存储的数据是一个对象
-const data = {
-    username: 'john_doe',
-    score: 100,
-    level: 5,
-  };
-  
-  // 发送消息给后台页，存储数据
-  chrome.runtime.sendMessage({ action: 'saveData', data: data }, (response) => {
-    console.log('Data saved:', response);
-  });
-  
+// 监听所有网络响应
+fetch = window.fetch || fetch;
+XMLHttpRequest.prototype.send = new Proxy(XMLHttpRequest.prototype.send, {
+  apply(target, thisArg, argumentsList) {
+    thisArg.addEventListener("load", function () {
+      const response = {
+        url: thisArg.responseURL,
+        status: thisArg.status,
+        statusText: thisArg.statusText,
+        responseText: thisArg.responseText
+      };
+      // 向background脚本发送响应信息
+      chrome.runtime.sendMessage({ type: "response", response });
+    });
+    return target.apply(thisArg, argumentsList);
+  }
+});
