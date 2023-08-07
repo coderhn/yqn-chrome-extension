@@ -1,20 +1,49 @@
 // 获取当前标签页的URL
 const lowCodeHost = "pr-ops.iyunquna.com";
-const appFeatureBranch = 'feature/f0fc2422_1_both';
-const schemaFeatureBranch = 'feature/051867dc_1_both';
 
-chrome.tabs.query({ active: true, currentWindow: true }, async function (tabs) {
+chrome.tabs.query({ currentWindow: true, active: true }, async function (tabs) {
+    if (!tabs.length) {
+        return;
+    }
+
+    chrome.runtime.sendMessage({ eventName: "getCurrentTab", data: tabs[0] });
+
+    // chrome.runtime.onMessage.addListener(async function (message) {
+    //     var url = new URL(tabs[0].url);
+    //     if (message.eventName === "getDevBranch" && message.data) {
+    //         const devBranchName = message.data;
+    //         console.log("成功获取到对应开发分支", devBranchName);
+            // const cacheSchemaList = getLocalStorage(KEYS.PAGE_SCHEMA_LIST);
+            // const cacheDevBranchName = getLocalStorage(KEYS.DEV_BRANCH_NAME);
+
+            // // INFO 如果缓存中存在当前用户选择的分支并且存在当前分支的schemaList则直接读取缓存
+            // if (cacheDevBranchName === devBranchName && Array.isArray(cacheSchemaList) && cacheSchemaList.length) {
+            //     const curPageSchema = cacheSchemaList.find((d) => d.path === url.pathname)
+            //     if (curPageSchema) {
+            //         createAElement(curPageSchema, url.port, devBranchName)
+            //     } else {
+            //         await initView(url, devBranchName);
+            //     }
+            //     return;
+            // }
+            // await initView(url, devBranchName);
+    //     }
+    // });
     var url = new URL(tabs[0].url);
+    const cacheSchemaList = getLocalStorage(KEYS.PAGE_SCHEMA_LIST);
+    const cacheDevBranchName = getLocalStorage(KEYS.DEV_BRANCH_NAME);
 
-
-    // const pageShcemaList = getLocalStorage(KEYS.PAGE_SCHEMA_LIST);
-
-    // if (pageShcemaList && getLocalStorage(KEYS.APP_BRANCH_NAME) === appFeatureBranch) {
-    //     createAElement(pageShcemaList.find((d) => d.path === url.pathname), url.port, schemaFeatureBranch);
-    //     return;
-    // }
-
-    // await initView(url);
+    // INFO 如果缓存中存在当前用户选择的分支并且存在当前分支的schemaList则直接读取缓存
+    if (cacheDevBranchName && Array.isArray(cacheSchemaList) && cacheSchemaList.length) {
+        const curPageSchema = cacheSchemaList.find((d) => d.path === url.pathname)
+        if (curPageSchema) {
+            createAElement(curPageSchema, url.port, cacheDevBranchName)
+        } else {
+            await initView(url, cacheDevBranchName);
+        }
+        return;
+    }
+    await initView(url, cacheDevBranchName);
 
 });
 
@@ -36,7 +65,7 @@ function createLoadingElementByParent() {
     return text;
 }
 
-async function initView(url) {
+async function initView(url, devBranchName) {
     const conatiner = document.querySelector("#container");
     const text = createLoadingElementByParent();
     const uuid = guid();
@@ -46,15 +75,17 @@ async function initView(url) {
             guid: uuid,
             lang: "zh",
             timezone: "Asia/Shanghai",
-            xCallerId: appFeatureBranch,
+            xCallerId: devBranchName,
             xSourceAppId: url.port
         },
         model: {
             appId: url.port,
             env: "qa4",
-            featureBranch: appFeatureBranch
+            featureBranch: devBranchName
         }
     }
+
+
     const res = await fetch(requestUrl, {
         "headers": {
             "accept": "application/json, text/plain, */*",
@@ -74,6 +105,7 @@ async function initView(url) {
         "mode": "cors",
         "credentials": "include"
     }).then((res) => res.text());
+
     const schemaRes = JSON.parse(res);
 
     if (schemaRes.code === 200) {
@@ -84,8 +116,8 @@ async function initView(url) {
                 conatiner.removeChild(text)
             }, 1000);
             setLocalStorage(KEYS.PAGE_SCHEMA_LIST, JSON.stringify(schemaRes.data));
-            setLocalStorage(KEYS.APP_BRANCH_NAME,JSON.stringify(appFeatureBranch))
-            createAElement(curPageSchemaConfig, url.port, schemaFeatureBranch)
+            // setLocalStorage(KEYS.DEV_BRANCH_NAME, JSON.stringify(devBranchName))
+            createAElement(curPageSchemaConfig, url.port, devBranchName)
         } else {
             setTimeout(() => {
                 text.innerHTML = `初始化失败:在schema列表中没有找到当前页面的配置`
@@ -98,8 +130,3 @@ async function initView(url) {
     }
 }
 
-
-
-
-
-// https://ops.iyunquna.com/63005/configuration?pageId=61f0e13a-ec55-4816-90eb-c973c45f089c&env=undefined&appId=62100&layout_level=1&source=%E9%A1%B5%E9%9D%A2%E9%85%8D%E7%BD%AE&email_key=feature%2F051867dc_1_both

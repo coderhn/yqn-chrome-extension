@@ -1,7 +1,6 @@
 const KEYS = {
     PAGE_SCHEMA_LIST: 'page_schema_list', // 业务应用从schema获取到的页面配置相关信息
-    APP_BRANCH_NAME: 'app_branch_name',// 业务应用分支
-    SCHEMA_EDIT_BRANCH_NAME: 'schema_edit_branch_name',// 动态搭建选择的分支，用于生成跳转到指定页面路由
+    DEV_BRANCH_NAME: 'dev_branch_name',// 业务应用分支
 }
 
 const guid = () => {

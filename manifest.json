@@ -7,28 +7,32 @@
     "default_popup": "popup.html",
     "default_icon": "logo.png"
   },
-  "host_permissions": ["*://*.yqn.com/*", "*://*.iyunquna.com/*", "*://map.weixin.qq.com/*"],
+  "host_permissions": [
+    "https://*/*",
+    "https://qa4-local-work.yqn.com:*/*",
+    "https://gw-ops.iyunquna.com/*"
+  ],
   "permissions": [
     "tabs",
     "storage",
     "cookies",
     "webRequest",
-    "webRequestBlocking",
     "webRequestAuthProvider",
-    "declarativeNetRequest",
-    "https://*/*"
+    "declarativeNetRequest"
   ],
   "background": {
-    "service_worker":"background.js"
+    "service_worker": "background.js"
   },
   "web_accessible_resources": [
     {
       "matches": ["<all_urls>"],
-      "resources":["assets/"]
+      "resources": ["assets/"]
     }
   ],
-  "content_scripts":[{
-    "matches":["<all_urls>"],
-    "js":["content.js"]
-  }]
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
 }
