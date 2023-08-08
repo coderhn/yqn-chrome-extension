@@ -1,52 +1,6 @@
 // 获取当前标签页的URL
 const lowCodeHost = "pr-ops.iyunquna.com";
 
-chrome.tabs.query({ currentWindow: true, active: true }, async function (tabs) {
-    if (!tabs.length) {
-        return;
-    }
-
-    chrome.runtime.sendMessage({ eventName: "getCurrentTab", data: tabs[0] });
-
-    // chrome.runtime.onMessage.addListener(async function (message) {
-    //     var url = new URL(tabs[0].url);
-    //     if (message.eventName === "getDevBranch" && message.data) {
-    //         const devBranchName = message.data;
-    //         console.log("成功获取到对应开发分支", devBranchName);
-            // const cacheSchemaList = getLocalStorage(KEYS.PAGE_SCHEMA_LIST);
-            // const cacheDevBranchName = getLocalStorage(KEYS.DEV_BRANCH_NAME);
-
-            // // INFO 如果缓存中存在当前用户选择的分支并且存在当前分支的schemaList则直接读取缓存
-            // if (cacheDevBranchName === devBranchName && Array.isArray(cacheSchemaList) && cacheSchemaList.length) {
-            //     const curPageSchema = cacheSchemaList.find((d) => d.path === url.pathname)
-            //     if (curPageSchema) {
-            //         createAElement(curPageSchema, url.port, devBranchName)
-            //     } else {
-            //         await initView(url, devBranchName);
-            //     }
-            //     return;
-            // }
-            // await initView(url, devBranchName);
-    //     }
-    // });
-    var url = new URL(tabs[0].url);
-    const cacheSchemaList = getLocalStorage(KEYS.PAGE_SCHEMA_LIST);
-    const cacheDevBranchName = getLocalStorage(KEYS.DEV_BRANCH_NAME);
-
-    // INFO 如果缓存中存在当前用户选择的分支并且存在当前分支的schemaList则直接读取缓存
-    if (cacheDevBranchName && Array.isArray(cacheSchemaList) && cacheSchemaList.length) {
-        const curPageSchema = cacheSchemaList.find((d) => d.path === url.pathname)
-        if (curPageSchema) {
-            createAElement(curPageSchema, url.port, cacheDevBranchName)
-        } else {
-            await initView(url, cacheDevBranchName);
-        }
-        return;
-    }
-    await initView(url, cacheDevBranchName);
-
-});
-
 function createAElement(data, port, schemaFeatureBranch) {
     const conatiner = document.querySelector("#container");
     const aElement = document.createElement('a');
@@ -57,17 +11,30 @@ function createAElement(data, port, schemaFeatureBranch) {
     return aElement;
 }
 
-function createLoadingElementByParent() {
-    const conatiner = document.querySelector("#container");
-    const text = document.createElement('span');
-    text.innerHTML = '初始化获取schema配置中....'
-    conatiner.appendChild(text);
-    return text;
+/**
+ * 
+ * @returns 获取background缓存的分支名
+ */
+const getCurBranchName = async () => {
+    return await new Promise((resolve, reject) => {
+        try {
+            chrome.storage.local.get(["dev_branch_name"], (e) => {
+                resolve(e.dev_branch_name);
+            })
+        } catch (error) {
+            reject(error)
+        }
+
+    });
 }
 
-async function initView(url, devBranchName) {
-    const conatiner = document.querySelector("#container");
-    const text = createLoadingElementByParent();
+/**
+ * 
+ * @param {*} devBranchName 
+ * @param {*} url 
+ * @returns 获取指定分支的schema配置
+ */
+const getSchemaConfig = async (devBranchName, url) => {
     const uuid = guid();
     const requestUrl = `https://gw-ops.iyunquna.com/api/64104/doctor/findAllRouterPagesByAppId?guid=${uuid}`;
     const body = {
@@ -85,8 +52,7 @@ async function initView(url, devBranchName) {
         }
     }
 
-
-    const res = await fetch(requestUrl, {
+    return await fetch(requestUrl, {
         "headers": {
             "accept": "application/json, text/plain, */*",
             "accept-language": "zh,zh-CN;q=0.9",
@@ -104,29 +70,62 @@ async function initView(url, devBranchName) {
         "method": "POST",
         "mode": "cors",
         "credentials": "include"
-    }).then((res) => res.text());
+    }).then((res) => res.text()).then((res) => JSON.parse(res));
+}
 
-    const schemaRes = JSON.parse(res);
-
-    if (schemaRes.code === 200) {
-        const curPageSchemaConfig = schemaRes.data.find((d) => d.path === url.pathname);
-        if (curPageSchemaConfig) {
-            setTimeout(() => {
-                text.innerHTML = '初始化成功'
-                conatiner.removeChild(text)
-            }, 1000);
-            setLocalStorage(KEYS.PAGE_SCHEMA_LIST, JSON.stringify(schemaRes.data));
-            // setLocalStorage(KEYS.DEV_BRANCH_NAME, JSON.stringify(devBranchName))
-            createAElement(curPageSchemaConfig, url.port, devBranchName)
-        } else {
-            setTimeout(() => {
-                text.innerHTML = `初始化失败:在schema列表中没有找到当前页面的配置`
-            }, 1000);
+/**
+ * 
+ * @param {*} data 
+ * @param {*} url 
+ * @returns 匹配当前的页面对应的schema列表
+ */
+const matchCurrentPageUrl = (data, url) => {
+    return data.filter((d) => {
+        // 兼容路由带参数
+        if (/:/.test(d.path)) {
+            return url.pathname.startsWith(d.path.split(":")[0])
         }
-    } else {
-        setTimeout(() => {
-            text.innerHTML = `初始化失败:${schemaRes.msg}`
-        }, 1000);
+        return d.path === url.pathname
+    })
+}
+
+const renderPopupElement = (matchedCurrentPageUrls, url, devBranchName) => {
+    if (matchedCurrentPageUrls.length) {
+        // 成功匹配到当前应用页面的schema开发页面
+        matchedCurrentPageUrls.forEach((d) => createAElement(d, url.port, devBranchName));
     }
 }
+
+/**
+ * 初始化扩展页面
+ */
+const initPopupPage = async () => {
+    const devBranchName = await getCurBranchName()
+    console.log("devBranchName", devBranchName);
+    chrome.tabs.query({ currentWindow: true, active: true }, async function (tabs) {
+        if (!tabs.length) {
+            // TODO 容错提示
+            return;
+        }
+        const curURL = new URL(tabs[0].url);
+        const schemaConfig = await getSchemaConfig(devBranchName, curURL);
+        if (schemaConfig.code === 200 && Array.isArray(schemaConfig.data) && schemaConfig.data.length) {
+            localStorage.setItem('page_schema_list',JSON.stringify(schemaConfig.data));
+            const matchedCurrentPageUrls = matchCurrentPageUrl(schemaConfig.data, curURL);
+            renderPopupElement(matchedCurrentPageUrls, curURL, devBranchName);
+        }
+    })
+}
+
+initPopupPage();
+
+// function createLoadingElementByParent() {
+//     const conatiner = document.querySelector("#container");
+//     const text = document.createElement('span');
+//     text.innerHTML = '初始化获取schema配置中....'
+//     conatiner.appendChild(text);
+//     return text;
+// }
+
+
 

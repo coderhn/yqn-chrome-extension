@@ -13,6 +13,7 @@
     "https://gw-ops.iyunquna.com/*"
   ],
   "permissions": [
+    "activeTab",
     "tabs",
     "storage",
     "cookies",
