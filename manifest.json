@@ -12,6 +12,15 @@
     "https://qa4-local-work.yqn.com:*/*",
     "https://gw-ops.iyunquna.com/*"
   ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ruleset_1",
+        "enabled": true,
+        "path": "rules_1.json"
+      }
+    ]
+  },
   "permissions": [
     "activeTab",
     "tabs",
@@ -19,7 +28,9 @@
     "cookies",
     "webRequest",
     "webRequestAuthProvider",
-    "declarativeNetRequest"
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback",
+    "declarativeNetRequestWithHostAccess"
   ],
   "background": {
     "service_worker": "background.js"

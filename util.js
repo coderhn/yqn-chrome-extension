@@ -42,3 +42,31 @@ async function getAllCookies(storeId) {
     console.log("cookies", cookies);
     return cookies;
 }
+
+/**
+ * 
+ * @param {*} obj 
+ * @param {*} targetKey 
+ * @returns 递归查找pageId
+ */
+function findKeyAndSiblingData(obj, targetKey) {
+    let result = [];
+
+    if (typeof obj === 'object' && obj !== null) {
+        if (targetKey in obj) {
+            // 如果找到目标键，将目标键和值添加到结果中
+            // const key = String(obj[targetKey]);
+            result.push(JSON.parse(JSON.stringify(obj)));
+        }
+
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key) && key !== targetKey) {
+                // 递归遍历子对象，并将子对象和其父对象传递给下一层级
+                result = result.concat(findKeyAndSiblingData(obj[key], targetKey, obj));
+            }
+        }
+    }
+
+    return result;
+}
+
