@@ -28,17 +28,13 @@ chrome.webRequest.onBeforeRequest.addListener(
   ["requestBody"]
 );
 
-// chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((e) => {
-//   const msg = `Navigation to ${e.request.url} redirected on tab ${e.request.tabId}.`;
-//   console.log(msg);
+
+
+
+// chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+//   if (message.type === "apiResponse") {
+//     const apiResponse = message.data;
+//     console.log("API Response in background.js:", apiResponse);
+//     // Here you can process the API response as needed
+//   }
 // });
-
-
-
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  if (message.type === "apiResponse") {
-    const apiResponse = message.data;
-    console.log("API Response in background.js:", apiResponse);
-    // Here you can process the API response as needed
-  }
-});
