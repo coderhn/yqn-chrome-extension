@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "yqn-chrome-extension",
   "description": "一个服务于yqn动态搭建的chrome extension",
-  "version": "2.0",
+  "version": "1.0",
   "action": {
     "default_popup": "popup.html",
     "default_icon": "logo.png",
