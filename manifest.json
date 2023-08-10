@@ -5,13 +5,20 @@
   "version": "2.0",
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "logo.png"
+    "default_icon": "logo.png",
+    "default_title": "一个服务于yqn动态搭建的chrome extension" 
   },
   "host_permissions": [
     "https://*/*",
     "https://qa4-local-work.yqn.com:*/*",
     "https://gw-ops.iyunquna.com/*"
   ],
+  "icons": {
+    "16": "logo.png",
+    "32": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
+  },
   "declarative_net_request": {
     "rule_resources": [
       {
@@ -46,5 +53,6 @@
       "matches": ["<all_urls>"],
       "js": ["content.js"]
     }
-  ]
+  ],
+  "devtools_page": "devtools.html"
 }

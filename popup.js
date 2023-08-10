@@ -218,6 +218,14 @@ const initMainPageByCache = async (pageSchemaList, devBranchName, curURL) => {
   renderPopupElement(matchedCurrentPageUrls, curURL, devBranchName);
 };
 
+const initRefreshBtn = async(devBranchName,curURL)=>{
+  console.log('11111112222')
+    const btnElement  =  document.querySelector('#btn');
+    btnElement.addEventListener('click',async()=>{
+        console.log('111')
+        await initMainPageByRequest(devBranchName, curURL,true);
+    });
+}
 /**
  * 初始化扩展页面
  */
@@ -241,19 +249,13 @@ const initPopupPage = async () => {
 
     await initMainPageByRequest(devBranchName, curURL);
 
-    // await initRefreshBtn(devBranchName,curURL);
+    await initRefreshBtn(devBranchName,curURL);
 
 
 
   });
 };
 
-const initRefreshBtn = async(devBranchName,curURL)=>{
-    const btnElement  =  document.getElementById('btn');
-    btnElement.addEventListener('click',async()=>{
-        console.log('111')
-        await initMainPageByRequest(devBranchName, curURL,true);
-    });
-}
+
 
 initPopupPage();
