@@ -12,6 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-chrome.devtools.panels.create('yqn', 'icon.png', 'panel.html', () => {
-  console.log('user switched to this panel');
+chrome.devtools.panels.create("yqn", "icon.png", "panel.html", () => {
+  console.log("user switched to this panel");
 });
+
+function handleRequestFinished(request) {
+  if (
+    request._resourceType === "xhr" &&
+    request.response.status === 200 &&
+    request.response.content.mimeType === "application/json"
+  ) {
+    console.log('request',request);
+    // 解码压缩数据
+    // const decoder = new TextDecoder();
+    // const decompressedData = decoder.decode(new Uint8Array(request.response.content));
+
+    // // 将解压后的数据解析为JSON对象
+    // const json = JSON.parse(decompressedData);
+    // console.log("json",json)
+  }
+  // request.getContent().then(([content, mimeType]) => {
+  //   console.log("Content: ", content);
+  //   console.log("MIME type: ", mimeType);
+  // });
+}
+
+chrome.devtools.network.onRequestFinished.addListener(handleRequestFinished);
