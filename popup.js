@@ -9,9 +9,8 @@ function createAElement(data, port, schemaFeatureBranch, id) {
     `https://ops.iyunquna.com/63005/configuration?pageId=${data.pageId}&appId=${port}&layout_level=1&source=页面配置&email_key=${schemaFeatureBranch}`
   );
   aElement.setAttribute("target", "_blank");
-  aElement.innerHTML = `前往<b style="color:#000000">${
-    data.pageTitle || data.desc
-  }</b>schema编辑页`;
+  aElement.innerHTML = `前往<b style="color:#000000">${data.pageTitle || data.desc
+    }</b>schema编辑页`;
   conatiner.appendChild(aElement);
   return aElement;
 }
@@ -178,14 +177,14 @@ const renderPopupElement = async (matchedCurrentPageUrls, url, devBranchName, cl
 
     // 成功匹配到当前应用页面的schema开发页面
     matchedCurrentPageUrls.forEach((d) => {
-      createAElement(d, url.port, devBranchName, "mainPage");
+      createAElement(d, url.port, devBranchName, "mainPageList");
       const curChildrenPageConfig =
         JSON.parse(localStorage.getItem(`${d.pageId}`)) ||
         allChildrenPageConfig.find((v) => v.pageId === d.pageId);
       if (Boolean(curChildrenPageConfig)) {
         findKeyAndSiblingData(curChildrenPageConfig, "pageId")
           .filter((d) => "desc" in d)
-          .forEach((v) => createAElement(v, url.port, devBranchName, "childrenPage"));
+          .forEach((v) => createAElement(v, url.port, devBranchName, "childrenPageList"));
       }
     });
   }
@@ -197,14 +196,15 @@ const renderPopupElement = async (matchedCurrentPageUrls, url, devBranchName, cl
  * @param {*} curURL
  * @returns 通过调用shcema接口初始化主页路由节点
  */
-const initMainPageByRequest = async (devBranchName, curURL,cleanCache) => {
+const initMainPageByRequest = async (devBranchName, curURL, cleanCache) => {
   const schemaConfig = await getSchemaConfig(devBranchName, curURL);
   if (schemaConfig.code === 200 && Array.isArray(schemaConfig.data) && schemaConfig.data.length) {
     localStorage.setItem(`${devBranchName}`, JSON.stringify(schemaConfig.data));
     localStorage.setItem("devBranchName", JSON.stringify(devBranchName));
     const matchedCurrentPageUrls = matchCurrentPageUrl(schemaConfig.data, curURL);
-    renderPopupElement(matchedCurrentPageUrls, curURL, devBranchName,cleanCache);
+    renderPopupElement(matchedCurrentPageUrls, curURL, devBranchName, cleanCache);
   }
+
 };
 
 /**
@@ -218,14 +218,6 @@ const initMainPageByCache = async (pageSchemaList, devBranchName, curURL) => {
   renderPopupElement(matchedCurrentPageUrls, curURL, devBranchName);
 };
 
-const initRefreshBtn = async(devBranchName,curURL)=>{
-  console.log('11111112222')
-    const btnElement  =  document.querySelector('#btn');
-    btnElement.addEventListener('click',async()=>{
-        console.log('111')
-        await initMainPageByRequest(devBranchName, curURL,true);
-    });
-}
 /**
  * 初始化扩展页面
  */
@@ -239,8 +231,8 @@ const initPopupPage = async () => {
     const curURL = new URL(tabs[0].url);
     const pageSchemaList = JSON.parse(localStorage.getItem(`${devBranchName}`));
 
-    // const res = await findPageByPageId(devBranchName, curURL);
-    // console.log("res", res);
+    await clearCache(devBranchName,curURL);
+  
 
     if (Array.isArray(pageSchemaList) && pageSchemaList.length) {
       initMainPageByCache(pageSchemaList, devBranchName, curURL);
@@ -249,13 +241,32 @@ const initPopupPage = async () => {
 
     await initMainPageByRequest(devBranchName, curURL);
 
-    await initRefreshBtn(devBranchName,curURL);
-
-
-
   });
 };
 
+async function clearCache(devBranchName,curURL){
+  const btnElement = document.createElement('button');
+  btnElement.innerText = '清空缓存';
+  document.body.appendChild(btnElement);
+  console.log("btnElement", btnElement);
+  btnElement.addEventListener('click', async function () {
+    const mainPageList = document.getElementById("mainPageList");
+
+    while (mainPageList.firstChild) {
+      mainPageList.removeChild(mainPageList.firstChild);
+    }
+    const childrenPageList = document.getElementById("childrenPageList");
+
+    while (childrenPageList.firstChild) {
+      childrenPageList.removeChild(childrenPageList.firstChild);
+    }
+
+    await initMainPageByRequest(devBranchName, curURL);
+  })
+}
 
 
 initPopupPage();
+
+
+

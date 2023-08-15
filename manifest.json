@@ -37,7 +37,8 @@
     "webRequestAuthProvider",
     "declarativeNetRequest",
     "declarativeNetRequestFeedback",
-    "declarativeNetRequestWithHostAccess"
+    "declarativeNetRequestWithHostAccess",
+    "scripting"
   ],
   "background": {
     "service_worker": "background.js"

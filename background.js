@@ -34,68 +34,46 @@ chrome.webRequest.onBeforeRequest.addListener(
   ["requestBody"]
 );
 
-// function logResponse(responseDetails) {
-//   // console.log(responseDetails.url);
-//   // console.log(responseDetails.statusCode);
-//   // console.log(responseDetails.statusLine);
-//   console.log("responseDetails",responseDetails)
-// }
 
-// chrome.webRequest.onResponseStarted.addListener(logResponse, { urls: ["<all_urls>"] });
-
-// function callback(details) {
-//   let data = new Uint8Array(details.responseData);
-//   console.log("data", data);
-// }
-
-// chrome.webRequest.onDataReceived.addListener(
-//   callback,
-//   {
-//     urls: ["http://*/*", "https://*/*"],
-//     types: ["main_frame", "sub_frame", "script", "xmlhttprequest"],
-//   },
-//   ["responseData"]
-// );
-
-// chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-//   if (message.type === "apiResponse") {
-//     const apiResponse = message.data;
-//     console.log("API Response in background.js:", apiResponse);
-//     // Here you can process the API response as needed
-//   }
-// });
-
-chrome.runtime.onInstalled.addListener(({ reason }) => {
-  if (reason !== chrome.runtime.OnInstalledReason.INSTALL) {
-    return;
-  }
-
-  openDemoTab();
-
-  // Create an alarm so we have something to look at in the demo
-  // chrome.alarms.create('demo-default-alarm', {
-  //   delayInMinutes: 1,
-  //   periodInMinutes: 1
-  // });
-});
 
 chrome.action.onClicked.addListener(openDemoTab);
 
 function openDemoTab() {
-  chrome.tabs.create({ url: "./tutorial.html" });
+  chrome.runtime.onInstalled.addListener(({ reason }) => {
+    if (reason !== chrome.runtime.OnInstalledReason.INSTALL) {
+      return;
+    }
+    chrome.tabs.create({ url: "./tutorial.html" });
+  });
+
+  // chrome.tabs.query({active: true, lastFocusedWindow: true},function(tabs){
+  //   const [tab] = tabs;
+  //   chrome.scripting.insertCSS({
+  //     target: { tabId: tab.id },
+  //     files: ["./content.css"]
+  // })
+  //     .then(() => {
+  //         console.log("INJECTED THE FOREGROUND STYLES.");
+  
+  //         chrome.scripting.executeScript({
+  //             target: { tabId: tab.id },
+  //             files: ["./content.js"]
+  //         })
+  //             .then(() => {
+  //                 console.log("INJECTED THE FOREGROUND SCRIPT.");
+  //             });
+  //     })
+  //     .catch(err => console.log(err))
+  // })
 }
 
-// function callback(details){
-//     let data = new Uint8Array(details.responseData);
-//     console.log('data',data);
 
-// }
 
-// chrome.webRequest.onDataReceived.addListener(
-//     callback,
-//     {
-//         urls: ["http://*/*", "https://*/*"],
-//         types: ["main_frame", "sub_frame", "script", "xmlhttprequest"]
-//     },
-//     ["responseData"]
-// );
+
+
+
+
+
+
+
+
